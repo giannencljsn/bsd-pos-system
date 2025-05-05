@@ -28,3 +28,6 @@ Route::group(['middleware' => 'auth'], function () {
         ->name('payment-flow.chart');
 });
 
+Route::get('phpmyinfo', function () {
+    phpinfo();
+})->name('phpmyinfo');

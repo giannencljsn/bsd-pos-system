@@ -2,21 +2,47 @@
     "private": true,
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "dev:vite:web": "vite --config vite.web.config.js"
     },
     "devDependencies": {
         "@coreui/coreui": "^3.2.2",
         "@coreui/icons": "^1.0.1",
-        "axios": "^0.21",
-        "bootstrap": "^4.1.0",
+        "@tauri-apps/cli": "^2.5.0",
+        "axios": "^1.9.0",
+        "bootstrap": "^5.3.5",
+        "concurrently": "^9.0.1",
+        "electron": "^36.1.0",
+        "electron-packager": "^17.1.2",
         "laravel-mix": "^6.0.6",
         "laravel-vite-plugin": "^0.7.8",
         "popper.js": "^1.12",
+        "postcss": "^8.4.47",
         "sass": "^1.15.2",
+        "tailwind": "^2.3.1",
         "vite": "^4.4.7"
     },
     "dependencies": {
-        "autoprefixer": "^10.3.1"
+        "autoprefixer": "^10.3.1",
+        "tailwindcss": "^4.1.5"
     },
-    "type": "module"
+    "type": "module",
+    "name": "bsd-pos-system",
+    "version": "1.0.0",
+    "description": "<picture>\r     <source srcset=\"public/images/logo.png\"  \r             media=\"(prefers-color-scheme: dark)\">\r     <img src=\"public/images/logo-dark.png\" alt=\"App Logo\">\r </picture>",
+    "main": "vite.config.js",
+    "directories": {
+        "test": "tests"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/giannencljsn/bsd-pos-system.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/giannencljsn/bsd-pos-system/issues"
+    },
+    "homepage": "https://github.com/giannencljsn/bsd-pos-system#readme"
 }
