@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>@yield('title') || {{ config('app.name') }}</title>
@@ -9,7 +10,11 @@
     <!-- Favicon -->
     <link rel="icon" href="{{ asset('images/bsd_pos.png') }}">
 
-    @include('includes.main-css')
+    @include('includes.main-css')<!-- PWA  -->
+    <meta name="theme-color" content="#6777ef" />
+    <link rel="apple-touch-icon" href="{{ asset('bsd_pos.png') }}">
+    <link rel="manifest" href="{{ asset('/manifest.json') }}">
+
 </head>
 
 <body class="c-app">
@@ -33,5 +38,24 @@
     </div>
 
     @include('includes.main-js')
+    <script src="{{ asset('/sw.js') }}"></script>
+    <script>
+        if ("serviceWorker" in navigator) {
+            // Register a service worker hosted at the root of the
+            // site using the default scope.
+            navigator.serviceWorker.register("/sw.js").then(
+                (registration) => {
+                    console.log("Service worker registration succeeded:", registration);
+                },
+                (error) => {
+                    console.error(`Service worker registration failed: ${error}`);
+                },
+            );
+        } else {
+            console.error("Service workers are not supported.");
+        }
+    </script>
+
 </body>
+
 </html>
