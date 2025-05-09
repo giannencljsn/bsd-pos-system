@@ -9,74 +9,80 @@
                         </div>
                     </div>
                     <!-- This is the barcode scanner button -->
-                    <button onclick="startScanner()" class="btn btn-primary form-control">
-                        Start Barcode Scanner
-                    </button>
-                    <input id="product-input" type="text" class="form-control mt-2"
-                        placeholder="Scan or type product name or code..." readonly>
+
+                    <div>
+                        <a class="button" id="startButton">Start</a>
+                        <a class="button" id="resetButton">Reset</a>
+                    </div>
+
+                    <div>
+                        <video id="video" width="300" height="200" style="border: 1px solid gray"></video>
+                    </div>
+
+                    <div id="sourceSelectPanel" style="display:none">
+                        <label for="sourceSelect">Change video source:</label>
+                        <select id="sourceSelect" style="max-width:400px">
+                        </select>
+                    </div>
+
+                    <label>Result:</label>
+                    <pre><code id="result"></code></pre>
+
                 </div>
             </div>
         </div>
     </div>
+    <script type="text/javascript" src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+    <script type="text/javascript">
+        window.addEventListener('load', function () {
+            let selectedDeviceId;
+            const codeReader = new ZXing.BrowserMultiFormatReader()
+            console.log('ZXing code reader initialized')
+            codeReader.listVideoInputDevices()
+                .then((videoInputDevices) => {
+                    const sourceSelect = document.getElementById('sourceSelect')
+                    selectedDeviceId = videoInputDevices[0].deviceId
+                    if (videoInputDevices.length >= 1) {
+                        videoInputDevices.forEach((element) => {
+                            const sourceOption = document.createElement('option')
+                            sourceOption.text = element.label
+                            sourceOption.value = element.deviceId
+                            sourceSelect.appendChild(sourceOption)
+                        })
 
-    <!-- Camera Feed for Barcode Scanning -->
-    <div id="camera-container" style="display: none;">
-        <video id="camera" width="320" height="240" autoplay></video>
-        <canvas id="canvas" style="display: none;"></canvas>
-    </div>
+                        sourceSelect.onchange = () => {
+                            selectedDeviceId = sourceSelect.value;
+                        };
 
-    <script>
-        let video;
-        let canvas;
-        let context;
-
-        // Initialize ZXing scanner
-        function startScanner() {
-            document.getElementById('camera-container').style.display = 'block';
-            video = document.getElementById('camera');
-            canvas = document.getElementById('canvas');
-            context = canvas.getContext('2d');
-
-            // Start camera stream
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(function (stream) {
-                    video.srcObject = stream;
-                    scanBarcode();
-                })
-                .catch(function (err) {
-                    console.error('Error accessing camera: ', err);
-                });
-        }
-
-        // Function to scan barcode continuously
-        function scanBarcode() {
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-
-            // Send captured image to server for barcode decoding
-            const image = canvas.toDataURL('image/png'); // Convert image to base64 format
-            fetch('/decode-barcode', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: image })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.barcode) {
-                        console.log('Barcode Result:', data.barcode);
-                        // Set value to the input field with scanned barcode
-                        document.getElementById('product-input').value = data.barcode;
-                        // Optionally stop scanning after successful scan
-                        video.srcObject.getTracks().forEach(track => track.stop());
-                        document.getElementById('camera-container').style.display = 'none';
-                    } else {
-                        requestAnimationFrame(scanBarcode); // Keep scanning
+                        const sourceSelectPanel = document.getElementById('sourceSelectPanel')
+                        sourceSelectPanel.style.display = 'block'
                     }
+
+                    document.getElementById('startButton').addEventListener('click', () => {
+                        codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
+                            if (result) {
+                                console.log(result)
+                                document.getElementById('result').textContent = result.text
+                            }
+                            if (err && !(err instanceof ZXing.NotFoundException)) {
+                                console.error(err)
+                                document.getElementById('result').textContent = err
+                            }
+                        })
+                        console.log(`Started continous decode from camera with id ${selectedDeviceId}`)
+                    })
+
+                    document.getElementById('resetButton').addEventListener('click', () => {
+                        codeReader.reset()
+                        document.getElementById('result').textContent = '';
+                        console.log('Reset.')
+                    })
+
                 })
-                .catch(err => {
-                    console.error('Error during barcode decoding:', err);
-                });
-        }
+                .catch((err) => {
+                    console.error(err)
+                })
+        })
     </script>
 
     <div wire:loading class="card position-absolute mt-1 border-0" style="z-index: 1;left: 0;right: 0;">
