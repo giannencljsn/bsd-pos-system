@@ -13,34 +13,49 @@ class SearchProduct extends Component
     public $search_results;
     public $how_many;
 
-    public function mount() {
+    public function mount()
+    {
         $this->query = '';
         $this->how_many = 5;
         $this->search_results = Collection::empty();
     }
 
-    public function render() {
+    public function render()
+    {
         return view('livewire.search-product');
     }
 
-    public function updatedQuery() {
+    public function updatedQuery()
+    {
         $this->search_results = Product::where('product_name', 'like', '%' . $this->query . '%')
             ->orWhere('product_code', 'like', '%' . $this->query . '%')
             ->take($this->how_many)->get();
     }
 
-    public function loadMore() {
+    public function loadMore()
+    {
         $this->how_many += 5;
         $this->updatedQuery();
     }
 
-    public function resetQuery() {
+    public function resetQuery()
+    {
         $this->query = '';
         $this->how_many = 5;
         $this->search_results = Collection::empty();
     }
 
-    public function selectProduct($product) {
-        $this->dispatch('productSelected', $product);
+    public function selectProduct($scannedCode)
+    {
+        $product = Product::where('product_code', $scannedCode)->first();
+
+        if ($product) {
+            $this->dispatch('productSelected', $product);
+        } else {
+            $this->dispatch('productNotFound', $scannedCode); // Optional
+        }
+
     }
+
+
 }
