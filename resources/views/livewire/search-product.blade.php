@@ -62,7 +62,9 @@
                         codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
                             if (result) {
                                 console.log(result)
-                                const scannedCode = document.getElementById('result').textContent = result.text
+
+                                const scannedCode = result.text;
+                                document.getElementById('result').textContent = scannedCode;
                                 console.log("Scanned code:", scannedCode);
                                 //call livewire selectProduct with the scanned barcode
                                 Livewire.find(document.querySelector('[wire\\:id]').getAttribute('wire:id'))
