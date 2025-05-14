@@ -115,7 +115,19 @@ class ProductCart extends Component
 
     public function removeItem($row_id)
     {
-        Cart::instance($this->cart_instance)->remove($row_id);
+        try {
+            $cart = Cart::instance($this->cart_instance);
+
+            if ($cart->get($row_id)) {
+                $cart->remove($row_id);
+                $this->total_amount = $this->calculateTotal();
+                session()->flash('message', 'Item removed successfully.');
+            } else {
+                session()->flash('message', 'Item already removed or not found.');
+            }
+        } catch (\Gloudemans\Shoppingcart\Exceptions\InvalidRowIDException $e) {
+            session()->flash('message', 'Cart item not found or already deleted.');
+        }
     }
 
     public function updatedGlobalTax()
