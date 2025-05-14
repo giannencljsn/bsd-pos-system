@@ -82,28 +82,35 @@ class ProductCart extends Component
         });
 
         if ($exists->isNotEmpty()) {
-            session()->flash('message', 'Product exists in the cart!');
+            // Get the rowId of the existing item
+            $rowId = $exists->first()->rowId;
 
+            // Increase the quantity by 1
+            $cart->update($rowId, $exists->first()->qty + 1);
+
+            session()->flash('message', 'Product quantity updated in the cart!');
             return;
         }
 
         $this->product = $product;
 
+        $calculated = $this->calculate($product);
+
         $cart->add([
             'id' => $product['id'],
             'name' => $product['product_name'],
             'qty' => 1,
-            'price' => $this->calculate($product)['price'],
+            'price' => $calculated['price'],
             'weight' => 1,
             'options' => [
                 'product_discount' => 0.00,
                 'product_discount_type' => 'fixed',
-                'sub_total' => $this->calculate($product)['sub_total'],
+                'sub_total' => $calculated['sub_total'],
                 'code' => $product['product_code'],
                 'stock' => $product['product_quantity'],
                 'unit' => $product['product_unit'],
-                'product_tax' => $this->calculate($product)['product_tax'],
-                'unit_price' => $this->calculate($product)['unit_price']
+                'product_tax' => $calculated['product_tax'],
+                'unit_price' => $calculated['unit_price']
             ]
         ]);
 

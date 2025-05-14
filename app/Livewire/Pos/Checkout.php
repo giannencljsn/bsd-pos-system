@@ -64,43 +64,63 @@ class Checkout extends Component
         Cart::instance($this->cart_instance)->destroy();
     }
 
-    public function productSelected($product) {
-        $cart = Cart::instance($this->cart_instance);
+   public function productSelected($product)
+{
+    $cart = Cart::instance($this->cart_instance);
 
-        $exists = $cart->search(function ($cartItem, $rowId) use ($product) {
-            return $cartItem->id == $product['id'];
-        });
+    $exists = $cart->search(function ($cartItem, $rowId) use ($product) {
+        return $cartItem->id == $product['id'];
+    });
 
-        if ($exists->isNotEmpty()) {
-            session()->flash('message', 'Product exists in the cart!');
+    if ($exists->isNotEmpty()) {
+        $cartItem = $exists->first();
+        $rowId = $cartItem->rowId;
+        $newQty = $cartItem->qty + 1;
 
+        // Optionally check stock before increasing quantity
+        if ($newQty > $cartItem->options->stock) {
+            session()->flash('error', 'Not enough stock for this product.');
             return;
         }
 
-        $cart->add([
-            'id'      => $product['id'],
-            'name'    => $product['product_name'],
-            'qty'     => 1,
-            'price'   => $this->calculate($product)['price'],
-            'weight'  => 1,
-            'options' => [
-                'product_discount'      => 0.00,
-                'product_discount_type' => 'fixed',
-                'sub_total'             => $this->calculate($product)['sub_total'],
-                'code'                  => $product['product_code'],
-                'stock'                 => $product['product_quantity'],
-                'unit'                  => $product['product_unit'],
-                'product_tax'           => $this->calculate($product)['product_tax'],
-                'unit_price'            => $this->calculate($product)['unit_price']
-            ]
-        ]);
+        $cart->update($rowId, $newQty);
 
-        $this->check_quantity[$product['id']] = $product['product_quantity'];
-        $this->quantity[$product['id']] = 1;
-        $this->discount_type[$product['id']] = 'fixed';
-        $this->item_discount[$product['id']] = 0;
+        $this->quantity[$product['id']] = $newQty;
         $this->total_amount = $this->calculateTotal();
+
+        session()->flash('message', 'Product quantity updated in the cart!');
+        return;
     }
+
+    $calculated = $this->calculate($product);
+
+    $cart->add([
+        'id'      => $product['id'],
+        'name'    => $product['product_name'],
+        'qty'     => 1,
+        'price'   => $calculated['price'],
+        'weight'  => 1,
+        'options' => [
+            'product_discount'      => 0.00,
+            'product_discount_type' => 'fixed',
+            'sub_total'             => $calculated['sub_total'],
+            'code'                  => $product['product_code'],
+            'stock'                 => $product['product_quantity'],
+            'unit'                  => $product['product_unit'],
+            'product_tax'           => $calculated['product_tax'],
+            'unit_price'            => $calculated['unit_price']
+        ]
+    ]);
+
+    $this->check_quantity[$product['id']] = $product['product_quantity'];
+    $this->quantity[$product['id']] = 1;
+    $this->discount_type[$product['id']] = 'fixed';
+    $this->item_discount[$product['id']] = 0;
+    $this->total_amount = $this->calculateTotal();
+
+    session()->flash('message', 'Product added to the cart!');
+}
+
 
     public function removeItem($row_id) {
         Cart::instance($this->cart_instance)->remove($row_id);
