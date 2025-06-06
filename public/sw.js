@@ -27,12 +27,18 @@ const checkResponse = function (request) {
 };
 
 const addToCache = function (request) {
-    return caches.open("offline").then(function (cache) {
-        return fetch(request).then(function (response) {
-            return cache.put(request, response);
+    // Only cache requests with an HTTP or HTTPS scheme
+    if (request.url.startsWith('http://') || request.url.startsWith('https://')) {
+        return caches.open("offline").then(function (cache) {
+            return fetch(request).then(function (response) {
+                return cache.put(request, response);
+            });
         });
-    });
+    }
+    // Skip unsupported requests
+    return Promise.resolve(); // Skip unsupported requests
 };
+
 
 const returnFromCache = function (request) {
     return caches.open("offline").then(function (cache) {

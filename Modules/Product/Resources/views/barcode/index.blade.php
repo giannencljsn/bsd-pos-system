@@ -17,7 +17,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
-                <livewire:search-product/>
+                <livewire:find-product />
             </div>
         </div>
 
@@ -28,7 +28,7 @@
                 </div>
             </div>
             <div class="col-md-12">
-                <livewire:barcode.product-table/>
+                <livewire:barcode.product-table />
             </div>
         </div>
     </div>

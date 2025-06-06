@@ -14,7 +14,7 @@
     <div class="container-fluid mb-4">
         <div class="row">
             <div class="col-12">
-                <livewire:search-product/>
+                <livewire:find-product />
             </div>
         </div>
 
@@ -29,7 +29,8 @@
                                 <div class="col-lg-4">
                                     <div class="form-group">
                                         <label for="reference">Reference <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="reference" required readonly value="PRRN">
+                                        <input type="text" class="form-control" name="reference" required readonly
+                                            value="PRRN">
                                     </div>
                                 </div>
                                 <div class="col-lg-4">
@@ -48,13 +49,14 @@
                                     <div class="from-group">
                                         <div class="form-group">
                                             <label for="date">Date <span class="text-danger">*</span></label>
-                                            <input type="date" class="form-control" name="date" required value="{{ now()->format('Y-m-d') }}">
+                                            <input type="date" class="form-control" name="date" required
+                                                value="{{ now()->format('Y-m-d') }}">
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <livewire:product-cart :cartInstance="'purchase_return'"/>
+                            <livewire:product-cart :cartInstance="'purchase_return'" />
 
                             <div class="form-row">
                                 <div class="col-lg-4">
@@ -70,7 +72,8 @@
                                 <div class="col-lg-4">
                                     <div class="from-group">
                                         <div class="form-group">
-                                            <label for="payment_method">Payment Method <span class="text-danger">*</span></label>
+                                            <label for="payment_method">Payment Method <span
+                                                    class="text-danger">*</span></label>
                                             <select class="form-control" name="payment_method" id="payment_method" required>
                                                 <option value="Cash">Cash</option>
                                                 <option value="Credit Card">Credit Card</option>
@@ -85,7 +88,8 @@
                                     <div class="form-group">
                                         <label for="paid_amount">Amount Received <span class="text-danger">*</span></label>
                                         <div class="input-group">
-                                            <input id="paid_amount" type="text" class="form-control" name="paid_amount" required>
+                                            <input id="paid_amount" type="text" class="form-control" name="paid_amount"
+                                                required>
                                             <div class="input-group-append">
                                                 <button id="getTotalAmount" class="btn btn-primary" type="button">
                                                     <i class="bi bi-check-square"></i>
@@ -119,9 +123,9 @@
     <script>
         $(document).ready(function () {
             $('#paid_amount').maskMoney({
-                prefix:'{{ settings()->currency->symbol }}',
-                thousands:'{{ settings()->currency->thousand_separator }}',
-                decimal:'{{ settings()->currency->decimal_separator }}',
+                prefix: '{{ settings()->currency->symbol }}',
+                thousands: '{{ settings()->currency->thousand_separator }}',
+                decimal: '{{ settings()->currency->decimal_separator }}',
                 allowZero: true,
             });
 

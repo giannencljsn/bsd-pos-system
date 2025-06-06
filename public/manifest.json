@@ -1,14 +1,14 @@
 {
-    "name": "BSD Laravel POS",
+    "name": "BSD POS",
     "short_name": "LPT",
     "start_url": "/index.php",
     "background_color": "#6777ef",
-    "description": "Point of Sales System BSD",
+    "description": "PWA OF BSD POS",
     "display": "fullscreen",
     "theme_color": "#6777ef",
     "icons": [
         {
-            "src": "images/bsd_pos.png",
+            "src": "logo.PNG",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any maskable"

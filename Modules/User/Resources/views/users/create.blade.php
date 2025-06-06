@@ -3,9 +3,8 @@
 @section('title', 'Create User')
 
 @section('third_party_stylesheets')
-    <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet"/>
-    <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css"
-          rel="stylesheet">
+    <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet" />
+    <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
 @endsection
 
 @section('breadcrumb')
@@ -55,8 +54,7 @@
                                     <div class="form-group">
                                         <label for="password_confirmation">Confirm Password <span
                                                 class="text-danger">*</span></label>
-                                        <input class="form-control" type="password" name="password_confirmation"
-                                               required>
+                                        <input class="form-control" type="password" name="password_confirmation" required>
                                     </div>
                                 </div>
                             </div>
@@ -75,7 +73,7 @@
                                 <select class="form-control" name="is_active" id="is_active" required>
                                     <option value="" selected disabled>Select Status</option>
                                     <option value="1">Active</option>
-                                    <option value="2">Deactive</option>
+                                    <option value="2">Inactive</option>
                                 </select>
                             </div>
                         </div>
@@ -98,10 +96,8 @@
 
 @section('third_party_scripts')
     <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
-    <script
-        src="https://unpkg.com/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.js"></script>
-    <script
-        src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
+    <script src="https://unpkg.com/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.js"></script>
+    <script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
     <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
 @endsection
 
@@ -126,5 +122,3 @@
         });
     </script>
 @endpush
-
-

@@ -14,7 +14,7 @@
     <div class="container-fluid mb-4">
         <div class="row">
             <div class="col-12">
-                <livewire:search-product/>
+                <livewire:search-product />
             </div>
         </div>
 
@@ -30,7 +30,8 @@
                                 <div class="col-lg-4">
                                     <div class="form-group">
                                         <label for="reference">Reference <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="reference" required readonly value="SL">
+                                        <input type="text" class="form-control" name="reference" required readonly
+                                            value="SL">
                                     </div>
                                 </div>
                                 <div class="col-lg-4">
@@ -49,13 +50,14 @@
                                     <div class="from-group">
                                         <div class="form-group">
                                             <label for="date">Date <span class="text-danger">*</span></label>
-                                            <input type="date" class="form-control" name="date" required value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}">
+                                            <input type="date" class="form-control" name="date" required
+                                                value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}">
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <livewire:product-cart :cartInstance="'sale'"/>
+                            <livewire:product-cart :cartInstance="'sale'" />
 
                             <div class="form-row">
                                 <div class="col-lg-4">
@@ -69,9 +71,20 @@
                                     </div>
                                 </div>
                                 <div class="col-lg-4">
+                                    <div class="form-group">
+                                        <label for="payment_status">Payment Status <span
+                                                class="text-danger">*</span></label>
+                                        <select class="form-control" name="payment_status" id="payment_status" required>
+                                            <option value="Paid">Paid</option>
+                                            <option value="Unpaid">Unpaid</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
                                     <div class="from-group">
                                         <div class="form-group">
-                                            <label for="payment_method">Payment Method <span class="text-danger">*</span></label>
+                                            <label for="payment_method">Payment Method <span
+                                                    class="text-danger">*</span></label>
                                             <select class="form-control" name="payment_method" id="payment_method" required>
                                                 <option value="Cash">Cash</option>
                                                 <option value="Credit Card">Credit Card</option>
@@ -86,7 +99,8 @@
                                     <div class="form-group">
                                         <label for="paid_amount">Amount Received <span class="text-danger">*</span></label>
                                         <div class="input-group">
-                                            <input id="paid_amount" type="text" class="form-control" name="paid_amount" required>
+                                            <input id="paid_amount" type="text" class="form-control" name="paid_amount"
+                                                required>
                                             <div class="input-group-append">
                                                 <button id="getTotalAmount" class="btn btn-primary" type="button">
                                                     <i class="bi bi-check-square"></i>
@@ -120,9 +134,9 @@
     <script>
         $(document).ready(function () {
             $('#paid_amount').maskMoney({
-                prefix:'{{ settings()->currency->symbol }}',
-                thousands:'{{ settings()->currency->thousand_separator }}',
-                decimal:'{{ settings()->currency->decimal_separator }}',
+                prefix: '{{ settings()->currency->symbol }}',
+                thousands: '{{ settings()->currency->thousand_separator }}',
+                decimal: '{{ settings()->currency->decimal_separator }}',
                 allowZero: true,
             });
 
@@ -136,4 +150,166 @@
             });
         });
     </script>
+
+
+    <!-- IndexedDB Offline Functionality -->
+
+    <script>
+        const DB_NAME = 'SaleOfflineDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'sales';
+
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onupgradeneeded = event => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                        console.log('IndexedDB: Object store created:', STORE_NAME);
+                    }
+                };
+
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function saveOfflineSale(data) {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.add(data);
+
+                request.onsuccess = () => resolve(true);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function getAllOfflineSales() {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readonly');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.getAll();
+
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function clearOfflineSales() {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.clear();
+
+                request.onsuccess = () => resolve(true);
+                request.onerror = () => reject(request.error);
+            });
+        }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const saleForm = document.getElementById('sale-form');
+
+            saleForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                // Gather form data as object
+                const formData = new FormData(saleForm);
+                const dataObj = {};
+                formData.forEach((val, key) => dataObj[key] = val);
+
+                // Convert paid_amount masked string to number
+                const paidAmountMasked = dataObj.paid_amount || '';
+                const unmaskedPaidAmount = $('#paid_amount').maskMoney('unmasked')[0] || 0;
+                dataObj.paid_amount = unmaskedPaidAmount;
+
+                if (!navigator.onLine) {
+                    // Save offline
+                    try {
+                        await saveOfflineSale(dataObj);
+                        alert('You are offline. Sale saved locally and will sync when back online.');
+                        saleForm.reset();
+                    } catch (err) {
+                        alert('Failed to save sale offline: ' + err);
+                    }
+                } else {
+                    // Online, submit via AJAX (optional) or normal submit
+                    try {
+                        // Use fetch for AJAX submit
+                        const token = document.querySelector('input[name=_token]').value;
+                        const response = await fetch(saleForm.action, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': token,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify(dataObj),
+                        });
+
+                        if (response.ok) {
+                            alert('Sale submitted successfully!');
+                            saleForm.reset();
+                        } else {
+                            const errorText = await response.text();
+                            alert('Submit failed: ' + errorText);
+                        }
+                    } catch (error) {
+                        alert('Submit error: ' + error.message);
+                    }
+                }
+            });
+        });
+    </script>
+    <script>
+        async function syncOfflineSales() {
+            if (!navigator.onLine) return;
+
+            const offlineSales = await getAllOfflineSales();
+            if (offlineSales.length === 0) return;
+
+            try {
+                const token = document.querySelector('input[name=_token]').value;
+                const response = await fetch('/api/sync-offline-sales', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ records: offlineSales }),
+                });
+
+                if (response.ok) {
+                    await clearOfflineSales();
+                    console.log('Offline sales synced successfully!');
+                    alert('Offline sales synced to server.');
+                    location.reload();
+                } else {
+                    console.error('Sync failed:', await response.text());
+                }
+            } catch (err) {
+                console.error('Error syncing offline sales:', err);
+            }
+        }
+
+        window.addEventListener('online', syncOfflineSales);
+
+        // Optional: periodic sync every 30 seconds
+        setInterval(syncOfflineSales, 30000);
+
+        // Also try to sync on page load if online
+        document.addEventListener('DOMContentLoaded', () => {
+            if (navigator.onLine) {
+                syncOfflineSales();
+            }
+        });
+    </script>
+
 @endpush

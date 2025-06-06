@@ -31,3 +31,8 @@ Route::group(['middleware' => 'auth'], function () {
 Route::get('phpmyinfo', function () {
     phpinfo();
 })->name('phpmyinfo');
+
+
+Route::view('/offline-form', 'offline-form');
+
+

@@ -8,7 +8,6 @@ use Modules\Product\Entities\Product;
 
 class SearchProduct extends Component
 {
-
     public $query;
     public $search_results;
     public $how_many;
@@ -25,64 +24,52 @@ class SearchProduct extends Component
         return view('livewire.search-product');
     }
 
+    // This method is triggered whenever the query is updated after typing finishes or a barcode is scanned
     public function updatedQuery()
     {
-        $this->search_results = Product::where('product_name', 'like', '%' . $this->query . '%')
+        // Fetch matching products from the DB
+        $this->search_results = Product::query()
+            ->where('product_name', 'like', '%' . $this->query . '%')
             ->orWhere('product_code', 'like', '%' . $this->query . '%')
-            ->take($this->how_many)->get();
+            ->limit($this->how_many)
+            ->get();
+
+        // Auto-select the first result
+        $this->searchAndSelect();
     }
 
+
+
+    // Automatically select the first product once the query has finished updating
+    public function searchAndSelect()
+    {
+        if ($this->search_results->isNotEmpty()) {
+            $this->selectProduct($this->search_results->first()); // Automatically select the first product
+        }
+        $this->resetQuery();
+    }
+
+    // Method to handle selecting a product (either when clicked or automatically selected)
+    public function selectProduct($product)
+    {
+        // Logic for adding the product to the cart or performing any other actions
+        $this->dispatch('productSelected', $product); // Dispatch an event to select the product
+        // Clear the input and results
+        $this->resetQuery();
+    }
+
+    // Load more results when the "Load More" button is clicked
     public function loadMore()
     {
         $this->how_many += 5;
-        $this->updatedQuery();
+        $this->updatedQuery(); // Re-run the query with the updated results
     }
 
+    // Reset the query and search results
     public function resetQuery()
     {
         $this->query = '';
         $this->how_many = 5;
         $this->search_results = Collection::empty();
     }
-
-    public function findProductByBarcode($barcode)
-    {
-        // Find the product by barcode (product_code)
-        $product = Product::where('product_code', $barcode)->first();
-        return $product;
-    }
-
-
-    public function selectProduct($scannedCode)
-    {
-        // Query the Product model where product_code matches scannedCode
-        $productModel = Product::where('product_code', $scannedCode)->first();
-
-        if ($productModel) {
-            // Create an array with all the required key-value pairs
-            $product = [
-                'id' => $productModel->id,
-                'category_id' => $productModel->category_id,
-                'product_name' => $productModel->product_name,
-                'product_code' => $productModel->product_code,
-                'product_barcode_symbology' => $productModel->product_barcode_symbology,
-                'product_quantity' => $productModel->product_quantity,
-                'product_cost' => $productModel->product_cost,
-                'product_price' => $productModel->product_price,
-                'product_unit' => $productModel->product_unit,
-                'product_stock_alert' => $productModel->product_stock_alert,
-                'product_order_tax' => $productModel->product_order_tax,
-                'product_tax_type' => $productModel->product_tax_type,
-                'product_note' => $productModel->product_note,
-                'created_at' => $productModel->created_at,
-                'updated_at' => $productModel->updated_at
-            ];
-
-            // Dispatch the product array with the specified structure
-            $this->dispatch('productSelected', $product);
-        } else {
-            $this->dispatch('productNotFound', $scannedCode);
-        }
-    }
-
 }
